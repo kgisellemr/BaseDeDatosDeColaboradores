@@ -1,33 +1,72 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import Listado from './componentes/Listado'
+import Formulario from './componentes/Formulario'
+import { BaseColaboradores } from '../basecolaboradores'
+import Buscador from './componentes/Buscador'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import AppAlert from './componentes/Alert'
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [colaboradoresData, setColaboradoresData] = useState(BaseColaboradores);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
+
+  const addColaborator = (nombre, correo, edad, cargo, telefono) => {
+    const newData = [
+      ...colaboradoresData,
+      {
+        id: colaboradoresData.length + 1,
+        nombre: nombre,
+        correo: correo,
+        edad: edad,
+        cargo: cargo,
+        telefono: telefono
+      }
+    ];
+    setColaboradoresData(newData);
+    handleAlertMessage(true, "Colaborador Agregado", "success")
+  }
+
+  const deleteColaborator = (colaboradorId) => {
+    const newData = colaboradoresData.filter((colaborador) => colaboradorId !== colaborador.id)
+    setColaboradoresData(newData);
+  };
+
+  const searchColaborator = (text) => {
+    const newData = colaboradoresData.filter((colaborador) => {
+      if (colaborador.cargo.includes(text) || colaborador.nombre.includes(text) || colaborador.correo.includes(text)) {
+        return colaborador;
+      }
+    });
+    setColaboradoresData(newData);
+  };
+
+  const handleAlertMessage = (value, message, type) => {
+    setShowAlert(value);
+    setAlertMessage(message);
+    setAlertType(type);
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="title">
+        <h2><b>Lista de Colaboradores</b></h2>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+      <div className="buscador">
+        <Buscador searchColaborator={searchColaborator} />
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <div className="main-container">
+        <div className="list">
+          <Listado data={colaboradoresData} deleteColaborator={deleteColaborator} />
+        </div>
+        <div>
+          <Formulario handleAlertMessage={handleAlertMessage} addColaborator={addColaborator} />
+          {showAlert && <AppAlert message={alertMessage} type={alertType} />}
+        </div>
+      </div>
     </>
   )
 }
